@@ -1,40 +1,49 @@
 
+ var googleMapsBaseUrl = 'https://maps.googleapis.com/maps/api/streetview?size=600x400&location=';
+ var nyTimesBaseUrl = 'http://api.nytimes.com/svc/search/v2/articlesearch';
+ var nyTimesApiKey = '7b363882f54c420c90f354086bce4bae';
+
+    var fourSquareBaseUrl = 'https://api.foursquare.com/v2/venues/search?'; 
+    var clientId=  'MB0MVWIKLOFFRCDNABWAYRU4FKBLKUZSYXQPELUG2W2KNXM5';
+    var clientSecret = 'ZG2JJFTOUSQBOSYYJJYDFXCS34HQUEXW35LIJPZ5JRVFL3DX';
+
 function loadData() {
 
     var $body = $('body');
     var $wikiElem = $('#wikipedia-links');
     var $wikiHeaderElem = $('#wikipedia-header');
     var $nytHeaderElem = $('#nytimes-header');
+    var $placesElem = $('#four-places');
     var $nytElem = $('#nytimes-articles');
     var $greeting = $('#greeting');
-    var $places = $('.places-to-go');
+    var $places = $('#four-places');
+     var $placesTitle= $('#places-title');
     // clear out old data before new request
     $wikiElem.text("");
     $nytElem.text("");
-
+    $placesElem.text("");
     // Input variables
     var street = $('#street').val();
     var city = $('#city').val();
     var address = street + ', ' + city;
 
+    //SelecDropdown; 
+    var dropdown = '<select id="dropdownID">';
     // Greeting
     $greeting.text('So you want to live at ' + address + '?');
 
     // Background image
-    var googleMapsBaseUrl = 'https://maps.googleapis.com/maps/api/streetview?size=600x400&location=';
+   
     var googleMapsUrl = googleMapsBaseUrl + address;
     var backgroundImage = "<img class='bgimg' src='" + googleMapsUrl + "''>";
     $body.append(backgroundImage);
 
     //NY times
-    var nyTimesBaseUrl = 'http://api.nytimes.com/svc/search/v2/articlesearch';
-    var nyTimesApiKey = '7b363882f54c420c90f354086bce4bae';
+
+
     var nyTimesRequestUrl = nyTimesBaseUrl + '.json?api-key=' + nyTimesApiKey + '&q=' + city;
     
-    //foursquare 
-    var fourSquareBaseUrl = 'https://api.foursquare.com/v2/venues/search?'; 
-    var clientId=  'MB0MVWIKLOFFRCDNABWAYRU4FKBLKUZSYXQPELUG2W2KNXM5';
-    var clientSecret = 'ZG2JJFTOUSQBOSYYJJYDFXCS34HQUEXW35LIJPZ5JRVFL3DX';
+
     var foursquareRequestUrl  = fourSquareBaseUrl + 'near=' + city  + '&client_id=' + clientId + '&client_secret=' +  clientSecret + '&v=20171121'; 
 
 
@@ -71,7 +80,7 @@ function loadData() {
         dataType: "jsonp",
         success: function(data){
             for (var i = 0; i <= data[1].length - 1; i++) {
-                var pageLink = '<li><a href="' + data[3][i] + '">' + data[1][i] + '</a></li>';
+                var pageLink = '<li class="list-article"><a href="' + data[3][i] + '">' + data[1][i] + '</a></li>';
                 $wikiElem.append(pageLink);
             };
 
@@ -81,19 +90,19 @@ function loadData() {
 
       $.ajax({
         url: foursquareRequestUrl,
-        dataType: 'json',
+        dataType: 'jsonp',
         success: function (data) {
-            $places.empty();
             var result = data.response.venues;
-            for (var i = 0; i <= result.length - 1; i++) {
-
-                 var placeInfo = '<div> <h3>' + result[i].name + '</h3> <hr> </div>';
+            $placesTitle.text('Places in ' + city);
+            for (var i = 0; i <= result.length - 1; i++) {   
+                 var placeInfo = '<li id="article">' + result[i].name + '</li>  <p>'+ result[i].location.formattedAddress+ '</p><hr>';
                  $places.append(placeInfo);
             };
 
+
+
          
     },
-
         // Alert the user on error.
         error: function (e) {
             infowindow.setContent('<h5>Foursquare data is unavailable.</h5>');
@@ -101,11 +110,13 @@ function loadData() {
     }
     });
 
-
-
-
     return false;
 };
 
+
+
 $('#form-container').submit(loadData);
+
+
+
 
